@@ -95,9 +95,9 @@ describe("proxy", () => {
         eventHandler((event) => {
           return proxyRequest(event, url + "/debug", {
             fetch,
-            headers: { "x-custom1": "overridden" },
+            headers: [["x-custom1", "overridden"]],
             fetchOptions: {
-              headers: { "x-custom2": "overridden" },
+              headers: new Headers({ "x-custom2": "overridden" }),
             },
           });
         }),
