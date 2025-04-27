@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.15.2
+
+[compare changes](https://github.com/unjs/h3/compare/v1.15.1...v1.15.2)
+
+### 🩹 Fixes
+
+- Handle `FormData` body ([f38dd03](https://github.com/unjs/h3/commit/f38dd03))
+- Use `Response.bytes` to normalize `FormData` ([3757072](https://github.com/unjs/h3/commit/3757072))
+- Resolve formdata as buffer ([0c9b276](https://github.com/unjs/h3/commit/0c9b276))
+- **cache:** Correct comparison in cache headers ([#1034](https://github.com/unjs/h3/pull/1034))
+- Handle `Headers` when merging proxy headers ([#1027](https://github.com/unjs/h3/pull/1027))
+- **setCookie:** Unique by `name`, `domain` and `path` only ([#1042](https://github.com/unjs/h3/pull/1042))
+
+### 📖 Documentation
+
+- Use pnpm ([7c9c936](https://github.com/unjs/h3/commit/7c9c936))
+- Remove old bun lockfile ([bb754af](https://github.com/unjs/h3/commit/bb754af))
+
+### 🏡 Chore
+
+- Apply automated updates ([b32545f](https://github.com/unjs/h3/commit/b32545f))
+- Apply automated updates ([275c31c](https://github.com/unjs/h3/commit/275c31c))
+- Update deps ([af21efb](https://github.com/unjs/h3/commit/af21efb))
+- Apply automated updates ([baf37e5](https://github.com/unjs/h3/commit/baf37e5))
+- Update dev dependencies ([2bba589](https://github.com/unjs/h3/commit/2bba589))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+
 ## v1.15.1
 
 [compare changes](https://github.com/unjs/h3/compare/v1.15.0...v1.15.1)
