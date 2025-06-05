@@ -115,4 +115,9 @@ export declare class H3 {
   options(route: string, handler: RouteHandler, opts?: RouteOptions): H3;
   connect(route: string, handler: RouteHandler, opts?: RouteOptions): H3;
   trace(route: string, handler: RouteHandler, opts?: RouteOptions): H3;
+
+  /**
+   * Add a route using a route definition object (defineRoute).
+   */
+  addRoute(routeDef: { method: HTTPMethod; path: string; handler: EventHandler<any, any> }): H3;
 }

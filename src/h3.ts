@@ -8,7 +8,7 @@ import type { ServerOptions, Server } from "srvx";
 import type { RouterContext } from "rou3";
 import type { FetchHandler, H3Config } from "./types/h3.ts";
 import type { H3EventContext } from "./types/event.ts";
-import type { EventHandler, Middleware } from "./types/handler.ts";
+import type { EventHandler, EventHandlerResponse, Middleware } from "./types/handler.ts";
 import type {
   H3Route,
   HTTPMethod,
@@ -17,6 +17,7 @@ import type {
   RouteHandler,
   MiddlewareOptions,
 } from "./types/h3.ts";
+import type { InferOutput, StandardSchemaV1 } from "./utils/internal/standard-schema.ts";
 
 export type H3 = H3Type;
 
@@ -153,6 +154,31 @@ export const H3 = /* @__PURE__ */ (() => {
         normalizeMiddleware(fn, route ? { ...opts, route } : opts),
       );
       return this as unknown as H3Type;
+    }
+
+    /**
+     * Add a route using a typed route definition object (defineRoute).
+     */
+    addRoute<
+      M extends HTTPMethod, 
+      P extends string,
+      Input extends StandardSchemaV1 = StandardSchemaV1,
+      Output extends StandardSchemaV1 = StandardSchemaV1,
+      RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+      QueryParams extends StandardSchemaV1 = StandardSchemaV1,
+      Res extends EventHandlerResponse<InferOutput<Output>> = EventHandlerResponse<InferOutput<Output>>,
+    >(
+      routeDef: {
+        method: M;
+        route: P;
+        routeParams?: RouterParams;
+        queryParams?: QueryParams;
+        input?: Input;
+        output?: Output;
+        handler: EventHandler<Input, Output, RouterParams, QueryParams, Res>;
+      }
+    ) {
+      return this.on(routeDef.method, routeDef.route, routeDef.handler);
     }
   }
 

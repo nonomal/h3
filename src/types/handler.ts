@@ -1,12 +1,16 @@
+import type { InferInput, InferOutput, StandardSchemaV1 } from "../utils/internal/standard-schema.ts";
 import type { MaybePromise } from "./_utils.ts";
 import type { H3Event } from "./event.ts";
 
 //  --- event handler ---
 
 export type EventHandler<
-  Req extends EventHandlerRequest = EventHandlerRequest,
-  Res extends EventHandlerResponse = EventHandlerResponse,
-> = (event: H3Event<Req>) => Res;
+  Input extends StandardSchemaV1 = StandardSchemaV1,
+  Output extends StandardSchemaV1 = StandardSchemaV1,
+  RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+  QueryParams extends StandardSchemaV1 = StandardSchemaV1,
+  Res extends EventHandlerResponse<InferOutput<Output>> = EventHandlerResponse<InferOutput<Output>>,
+> = (event: H3Event<Input, Output, RouterParams, QueryParams>) => Res;
 
 export type EventHandlerFetch = (
   req: Request | URL | string,
@@ -14,25 +18,37 @@ export type EventHandlerFetch = (
 ) => Promise<Response>;
 
 export interface EventHandlerObject<
-  Req extends EventHandlerRequest = EventHandlerRequest,
-  Res extends EventHandlerResponse = EventHandlerResponse,
+  Input extends StandardSchemaV1 = StandardSchemaV1,
+  Output extends StandardSchemaV1 = StandardSchemaV1,
+  RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+  QueryParams extends StandardSchemaV1 = StandardSchemaV1,
+  Res extends EventHandlerResponse<InferOutput<Output>> = EventHandlerResponse<InferOutput<Output>>,
 > {
-  handler: EventHandler<Req, Res>;
+  handler: EventHandler<Input, Output, RouterParams, QueryParams, Res>;
   middleware?: Middleware[];
 }
 
-export interface EventHandlerRequest {
-  body?: unknown;
-  query?: Record<string, string>;
-  routerParams?: Record<string, string>;
+export interface EventHandlerRequest<
+Input extends StandardSchemaV1 = StandardSchemaV1,
+Output extends StandardSchemaV1 = StandardSchemaV1,
+RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+QueryParams extends StandardSchemaV1 = StandardSchemaV1,
+> {
+  input?: Input,
+  queryParams?: QueryParams;
+  routerParams?: RouterParams;
+  output: Output;
 }
 
 export type EventHandlerResponse<T = unknown> = T | Promise<T>;
 
 export type EventHandlerWithFetch<
-  Req extends EventHandlerRequest = EventHandlerRequest,
-  Res extends EventHandlerResponse = EventHandlerResponse,
-> = EventHandler<Req, Res> & {
+  Input extends StandardSchemaV1 = StandardSchemaV1,
+  Output extends StandardSchemaV1 = StandardSchemaV1,
+  RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+  QueryParams extends StandardSchemaV1 = StandardSchemaV1,
+  Res extends EventHandlerResponse<InferOutput<Output>> = EventHandlerResponse<InferOutput<Output>>,
+> = EventHandler<Input, Output, RouterParams, QueryParams, Res> & {
   fetch: EventHandlerFetch;
 };
 
@@ -57,4 +73,12 @@ export type InferEventInput<
   Key extends keyof EventHandlerRequest,
   Event extends H3Event,
   T,
-> = void extends T ? (Event extends H3Event<infer E> ? E[Key] : never) : T;
+> =
+  void extends T
+    ? (
+        Event extends H3Event<infer Input>
+          ? Key extends "input" ? InferInput<Input>
+            : never
+          : never
+      )
+    : T;

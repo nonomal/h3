@@ -5,10 +5,7 @@ import { parseURLEncodedBody } from "./internal/body.ts";
 import type { H3Event } from "../types/event.ts";
 import type { InferEventInput } from "../types/handler.ts";
 import type { ValidateResult } from "./internal/validate.ts";
-import type {
-  StandardSchemaV1,
-  InferOutput,
-} from "./internal/standard-schema.ts";
+
 
 /**
  * Reads request body and tries to parse using JSON.parse or URLSearchParams.
@@ -26,7 +23,7 @@ import type {
 export async function readBody<
   T,
   _Event extends H3Event = H3Event,
-  _T = InferEventInput<"body", _Event, T>,
+  _T = InferEventInput<"input", _Event, T>,
 >(event: _Event): Promise<undefined | _T> {
   const text = await event.req.text();
   if (!text) {
@@ -51,18 +48,12 @@ export async function readBody<
 
 export async function readValidatedBody<
   Event extends H3Event,
-  S extends StandardSchemaV1,
->(event: Event, validate: S): Promise<InferOutput<S>>;
-export async function readValidatedBody<
-  Event extends H3Event,
-  OutputT,
-  InputT = InferEventInput<"body", Event, OutputT>,
 >(
   event: Event,
-  validate: (
-    data: InputT,
-  ) => ValidateResult<OutputT> | Promise<ValidateResult<OutputT>>,
-): Promise<OutputT>;
+  validate?: (
+    data: InferEventInput<"input", Event, unknown>,
+  ) => ValidateResult<InferEventInput<"input", Event, unknown>> | Promise<ValidateResult<InferEventInput<"input", Event, unknown>>>,
+): Promise<InferEventInput<"input", Event, unknown>>;
 /**
  * Tries to read the request body via `readBody`, then uses the provided validation schema or function and either throws a validation error or returns the result.
  *
@@ -93,8 +84,9 @@ export async function readValidatedBody<
  */
 export async function readValidatedBody(
   event: H3Event,
-  validate: any,
+  validate?: any,
 ): Promise<any> {
   const _body = await readBody(event);
-  return validateData(_body, validate);
+  
+  return validateData(_body, event.context.schema?.input || validate);
 }

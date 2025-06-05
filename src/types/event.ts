@@ -1,15 +1,18 @@
 import type { ServerRequest } from "srvx";
 import type { Session } from "../utils/session.ts";
 import type { H3Route } from "./h3.ts";
-import type { EventHandlerRequest } from "./handler.ts";
+import type { StandardSchemaV1 } from "../utils/internal/standard-schema.ts";
 
 export declare class H3Event<
-  _RequestT extends EventHandlerRequest = EventHandlerRequest,
+  Input extends StandardSchemaV1 = StandardSchemaV1,
+  Output extends StandardSchemaV1 = StandardSchemaV1,
+  RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+  QueryParams extends StandardSchemaV1 = StandardSchemaV1,
 > {
   /**
    * Event context.
    */
-  readonly context: H3EventContext;
+  readonly context: H3EventContext<Input, Output, RouterParams, QueryParams>;
 
   /**
    * Incoming HTTP request info.
@@ -80,9 +83,21 @@ export declare class H3Event<
   toString(): string;
 }
 
-export interface H3EventContext extends Record<string, any> {
+export interface H3EventContext<
+  Input extends StandardSchemaV1 = StandardSchemaV1,
+  Output extends StandardSchemaV1 = StandardSchemaV1,
+  RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+  QueryParams extends StandardSchemaV1 = StandardSchemaV1,
+> extends Record<string, any> {
   /* Matched router parameters */
   params?: Record<string, string>;
+
+  schema?: {
+    input?: Input;
+    output?: Output;
+    routerParams?: RouterParams;
+    queryParams?: QueryParams;
+  }
 
   /* Matched middleware parameters */
   middlewareParams?: Record<string, string>;

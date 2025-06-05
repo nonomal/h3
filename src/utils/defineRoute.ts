@@ -1,5 +1,5 @@
 import type { HTTPMethod } from "../types/h3.ts";
-import type { EventHandler, EventHandlerRequest, EventHandlerResponse } from "../types/handler.ts";
+import type { EventHandler, EventHandlerResponse } from "../types/handler.ts";
 import type { InferOutput, StandardSchemaV1 } from "./internal/standard-schema.ts";
 
 /**
@@ -8,27 +8,29 @@ import type { InferOutput, StandardSchemaV1 } from "./internal/standard-schema.t
 export function defineRoute<
   M extends HTTPMethod, 
   P extends string,
-  PathParams extends StandardSchemaV1 = StandardSchemaV1,
   Input extends StandardSchemaV1 = StandardSchemaV1,
   Output extends StandardSchemaV1 = StandardSchemaV1,
-  Req extends EventHandlerRequest = EventHandlerRequest,
+  RouterParams extends StandardSchemaV1 = StandardSchemaV1,
+  QueryParams extends StandardSchemaV1 = StandardSchemaV1,
   Res extends EventHandlerResponse<InferOutput<Output>> = EventHandlerResponse<InferOutput<Output>>,
 >(
   def: {
     method: M;
-    pathParams?: PathParams;
-    path: P;
+    routerParams?: RouterParams;
+    queryParams?: QueryParams;
+    route: P;
     input?: Input;
     output?: Output;
-    handler: EventHandler<Input, Output, Req, Res>; // input tipi EventHandlerRequest ile birleşti
+    handler: EventHandler<Input, Output, RouterParams, QueryParams, Res>;
   }
 ): {
   method: M;
-  pathParams?: PathParams;
-  path: P;
+  routerParams?: RouterParams;
+  queryParams?: QueryParams;
+  route: P;
   input?: Input;
   output?: Output;
-  handler: EventHandler<Input, Output, Req, Res>; // input tipi EventHandlerRequest ile birleşti
+  handler: EventHandler<Input, Output, RouterParams, QueryParams, Res>;
 } {
   return def;
 }

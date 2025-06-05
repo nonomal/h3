@@ -12,7 +12,7 @@ export type {
 } from "./types/h3.ts";
 
 export { H3, serve } from "./h3.ts";
-
+export { defineRoute } from "./utils/defineRoute.ts";
 // Event
 export type { H3EventContext } from "./types/event.ts";
 export { H3Event } from "./event.ts";
