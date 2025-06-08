@@ -36,12 +36,9 @@ export const H3 = /* @__PURE__ */ (() => {
       this.handler = this.handler.bind(this);
     }
 
-    fetch(
-      request: ServerRequest | URL | string,
-      options?: RequestInit,
-    ): Promise<Response> {
+    fetch(request: ServerRequest | URL | string): Promise<Response> {
       try {
-        return Promise.resolve(this._fetch(request, options));
+        return Promise.resolve(this._fetch(request));
       } catch (error: any) {
         return Promise.reject(error);
       }
