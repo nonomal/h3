@@ -9,6 +9,7 @@ import {
   createOriginHeaders,
   resolveCorsOptions,
 } from "./internal/cors.ts";
+import type { HTTPResponse } from "../response.ts";
 
 export { isCorsOriginAllowed } from "./internal/cors.ts";
 
@@ -150,12 +151,12 @@ export function appendCorsHeaders(event: H3Event, options: CorsOptions): void {
 export function handleCors(
   event: H3Event,
   options: CorsOptions,
-): false | Response {
+): false | HTTPResponse {
   const _options = resolveCorsOptions(options);
   if (isPreflightRequest(event)) {
-    appendCorsPreflightHeaders(event, options);
-    return noContent(event, _options.preflight.statusCode);
+    appendCorsPreflightHeaders(event, _options);
+    return noContent(_options.preflight.statusCode);
   }
-  appendCorsHeaders(event, options);
+  appendCorsHeaders(event, _options);
   return false;
 }
