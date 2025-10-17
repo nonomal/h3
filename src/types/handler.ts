@@ -3,6 +3,9 @@ import type { TypedRequest, TypedResponse, ResponseHeaderMap } from "fetchdts";
 import type { H3Event, HTTPEvent } from "../event.ts";
 import type { MaybePromise } from "./_utils.ts";
 import type { H3RouteMeta } from "./h3.ts";
+import type { H3Core } from "../h3.ts";
+
+export type HTTPHandler = EventHandler | FetchableObject | H3Core;
 
 //  --- event handler ---
 
@@ -68,10 +71,13 @@ export type Middleware = (
 
 // --- lazy event handler ---
 
-export type LazyEventHandler = () => EventHandler | Promise<EventHandler>;
+export type LazyEventHandler = () =>
+  | EventHandler
+  | FetchableObject
+  | Promise<EventHandler | FetchableObject>;
 
 export interface DynamicEventHandler extends EventHandlerWithFetch {
-  set: (handler: EventHandler) => void;
+  set: (handler: EventHandler | FetchableObject) => void;
 }
 
 // --- utils ---

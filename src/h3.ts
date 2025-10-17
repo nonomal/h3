@@ -5,12 +5,13 @@ import { callMiddleware, normalizeMiddleware } from "./middleware.ts";
 
 import type { ServerRequest } from "srvx";
 import type { RouterContext, MatchedRoute } from "rou3";
-import type { RouteHandler, H3Config, H3Plugin } from "./types/h3.ts";
+import type { H3Config, H3Plugin } from "./types/h3.ts";
 import type { H3EventContext } from "./types/context.ts";
 import type {
   EventHandler,
   FetchableObject,
   FetchHandler,
+  HTTPHandler,
   Middleware,
 } from "./types/handler.ts";
 import type {
@@ -22,10 +23,11 @@ import type {
 } from "./types/h3.ts";
 
 import { toRequest } from "./utils/request.ts";
+import { toEventHandler } from "./handler.ts";
 
 export type H3Core = H3Type;
 
-const NoHandler = () => kNotFound;
+export const NoHandler: EventHandler = () => kNotFound;
 
 export const H3Core = /* @__PURE__ */ (() => {
   // prettier-ignore
@@ -101,7 +103,10 @@ export const H3Core = /* @__PURE__ */ (() => {
       this._routes.push(_route);
     }
 
-    _getMiddleware(route: MatchedRoute<H3Route> | void): Middleware[] {
+    _getMiddleware(
+      _event: H3Event,
+      route: MatchedRoute<H3Route> | void,
+    ): Middleware[] {
       return route?.data.middleware
         ? [...this._middleware, ...route.data.middleware]
         : this._middleware;
@@ -114,9 +119,9 @@ export const H3Core = /* @__PURE__ */ (() => {
         event.context.matchedRoute = route.data;
       }
       const routeHandler = route?.data.handler || NoHandler;
-      const middleware = this._getMiddleware(route);
+      const middleware = this._getMiddleware(event, route);
       return middleware.length > 0
-        ? callMiddleware(event, middleware, () => routeHandler(event))
+        ? callMiddleware(event, middleware, routeHandler)
         : routeHandler(event);
     }
 
@@ -140,7 +145,7 @@ export const H3Core = /* @__PURE__ */ (() => {
         }
       } else {
         const fetchHandler = "fetch" in input ? input.fetch : input;
-        this.all(`${base}/**`, (event) => {
+        this.all(`${base}/**`, function _mountedMiddleware(event) {
           const url = new URL(event.url);
           url.pathname = url.pathname.slice(base.length) || "/";
           return fetchHandler(new Request(url, event.req));
@@ -156,22 +161,15 @@ export const H3Core = /* @__PURE__ */ (() => {
     on(
       method: HTTPMethod | Lowercase<HTTPMethod> | "",
       route: string,
-      handler: RouteHandler,
+      handler: HTTPHandler,
       opts?: RouteOptions,
     ): H3Type {
       const _method = (method || "").toUpperCase();
       route = new URL(route, "http://_").pathname;
-      if (
-        typeof handler === "object" &&
-        typeof (handler as FetchableObject)?.fetch === "function"
-      ) {
-        const _fetchHandler = (handler as FetchableObject).fetch.bind(handler);
-        handler = (event) => _fetchHandler(event.req);
-      }
       this._addRoute({
         method: _method as HTTPMethod,
         route,
-        handler: handler as EventHandler,
+        handler: toEventHandler(handler)!,
         middleware: opts?.middleware,
         meta: { ...(handler as EventHandler).meta, ...opts?.meta },
       });
